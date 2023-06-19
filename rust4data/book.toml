@@ -1,0 +1,6 @@
+[book]
+authors = ["Pedram Navid"]
+language = "en"
+multilingual = false
+src = "src"
+title = "Rust For Data"

@@ -4,3 +4,10 @@ language = "en"
 multilingual = false
 src = "src"
 title = "Rust For Data"
+
+[output.html]
+git-repository = "https://github.com/PedramNavid/rust-for-data/rust4data"
+edit-url-template = "https://github.com/PedramNavid/rust-for-data/edit/main/rust4data/{path}"
+
+[output.html.playground]
+editable = true

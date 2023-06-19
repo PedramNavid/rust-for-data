@@ -1,11 +1,24 @@
 import os
+import sys
 import requests
 
-lat = 37.9871
-lon = -122.5889
-appid = os.getenv("OWM_APPID")
+API_KEY = os.getenv("OWM_APPID")
 
-url = f"http://api.openweathermap.org/data/2.5/air_pollution?lat={lat}&lon={lon}&appid={appid}"
 
-body = requests.get(url).text
-print(body)
+def get_air_pollution(lat, lon):
+    url = f"http://api.openweathermap.org/data/2.5/air_pollution?lat={lat}&lon={lon}&appid={API_KEY}"
+    body = requests.get(url).text
+    return body
+
+
+if __name__ == "__main__":
+    usage = f"Usage: python {__file__} <lat> <lon>"
+
+    if len(sys.argv) != 3:
+        print(usage)
+        sys.exit(1)
+
+    lat = sys.argv[1]
+    lon = sys.argv[2]
+    body = get_air_pollution(lat, lon)
+    print(body)

@@ -235,7 +235,9 @@ cargo build --release
 
 ```bash
 # in wxpy
-hyperfine --warmup 3 --min-runs 10 'python -m wxpy.main 37.9871 -122.5889' --export-markdown ../benchmarks/chapter_3_python_wxpy.md
+hyperfine --warmup 3 --min-runs 10 \
+    'python -m wxpy.main 37.9871 -122.5889' \
+    --export-markdown ../benchmarks/chapter_3_python_wxpy.md
 ```
 
 {{#include ../../benchmarks/chapter_3_python_wxpy.md}}
@@ -243,7 +245,9 @@ hyperfine --warmup 3 --min-runs 10 'python -m wxpy.main 37.9871 -122.5889' --exp
 
 ```bash
 # in wxrs
-hyperfine --warmup 3 --min-runs 10 './target/release/wxrs 37.9871 -122.5889' --export-markdown rust.md
+hyperfine --warmup 3 --min-runs 10 \
+    './target/release/wxrs 37.9871 -122.5889' \
+    --export-markdown rust.md
 ```
 
 {{#include ../../benchmarks/chapter_3_rust_wxrs.md}}

@@ -2,14 +2,14 @@
 
 ## Installing Rust and Python
 
-You will need Rust and Python installed to follow along the examples here.
+You will need Rust and Python installed to follow along with the examples here.
 There are many ways to setup an environment, especially in Python, I've listed
 the one I like here.
 
-For Rust, you can install rust by going to [rustup.rs](https://rustup.rs/).
+For Rust, you can install Rust by going to [rustup.rs](https://rustup.rs/).
 
 For Python, I recommend using [pyenv](https://github.com/pyenv/pyenv) along with [pyenv-virtualenv](https://github.com/pyenv/pyenv-virtualenv).
-With both installed, here is my typicaly workflow:
+With both installed, here is my typical workflow:
 
 ```bash
 # Create a folder

@@ -127,8 +127,8 @@ mkdir wxrs/src/bin
 ```
 
 ```rust,editable
-// wxrs/src/ch3.rs
-{{#include ../../wxrs/src/ch3.rs}}
+// wxrs/src/bin/ch3.rs
+{{#include ../../wxrs/src/bin/ch3.rs}}
 ```
 
 ## Running the Program
@@ -189,17 +189,61 @@ structured data from JSON soon.
 ### Types
 
 One obvious difference is that in Rust, we declare the types of the lat and lon
-arguments, and in Python we do not.
+arguments, and in Python we do not. The trouble with talking about types is
+that it inevitably leads to a discussion of memory, which can devolve into a
+conversation around null pointer references, which we will largely avoid
+until the next chapter, but here's a light introduction.
 
-In Rust, as the program is compiled we know exactly how much space we need for
-lat and lng in memory: 32 bits or 4 bytes. We could opt for greater precision
-by using a 64-bit float or `f64` in Rust which would take 8 bytes of memory.
-Because we know how much memory we need, Rust stores the values on the stack,
-instead of the heap (more on this soon).
+In the Rust code, we've very explicitly defined the types for our function:
 
-In Python, we don't know how much memory lat and lon need until runtime. Python
+```rust
+{{#include ../../wxrs/src/bin/ch3.rs:1}}
+```
+
+Both `lat` and `lon` are `f32` or 32-bit floats. These are floating-point numbers
+that take exactly 32-bits of memory. The compiler knows exactly how much space
+to reserve for these values: 32-bits, or 4-bytes.
+
+Given that `lat` and `lon` doesn't require much precision beyond a few
+decimals, `f32` seems like the best choice for our code. We could even opt for
+greater precision by using a 64-bit float or `f64` in Rust which would take 8
+bytes of memory.
+
+Because we know exactly how much memory we need for these variables, Rust
+is able to store these values on the heap.
+
+In Python, we don't know how much memory lat and lon need until runtime because
+Python will accept anything in this function.
+
+```python
+{{#include ../../wxpy/wxpy/ch3/fetch_api.py:7:8}}
+```
+
+We could pass it a string, numbers, another function, or even `None`.
+
+```python
+>>> def join_two(a, b):
+...     return f"a+b={a}+{b}"
+...
+>>> join_two(1,2)
+'a+b=1+2'
+>>> join_two(None, None)
+'a+b=None+None'
+>>> join_two(join_two, join_two)
+'a+b=<function join_two at 0x7f8f7f7de980>+<function join_two at 0x7f8f7f7de980>'
+>>> join_two(join_two, join_two(join_two, join_two))
+'a+b=<function join_two at 0x7f8f7f7de980>+a+b=<function join_two at 0x7f8f7f7de980>+<function join_
+two at 0x7f8f7f7de980>'
+```
+
+Even the `url` line will not fail, because in Python duck-typing allows
+us great flexibility in what we do with variables. We can pass numbers into an
+f-string for concatenation just as easily as we can pass characters.
+
+Python
 will allocate these values on the heap, and it turns out that Python allocates
-about 24 bytes for each float.
+about 24 bytes for each float there. The actual values are stored in a private
+heap.
 
 Now, the difference between 24 bytes and 8 bytes is trivial for an application
 such as this, and even on the most memory-constrained devices it's not worth

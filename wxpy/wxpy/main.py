@@ -14,6 +14,10 @@ def get_air_pollution(lat, lon):
 if __name__ == "__main__":
     usage = f"Usage: python {__file__} <lat> <lon>"
 
+    if not API_KEY:
+        print("Please set OWM_APPID environment variable")
+        sys.exit(1)
+
     if len(sys.argv) != 3:
         print(usage)
         sys.exit(1)

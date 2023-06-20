@@ -1,5 +1,11 @@
 ## Rust For Data
 
+This book is available for free online at `https://rustfordata.com`
+You can find the source code for book in `./rust4data-book`
+This book is very early, so expect code to change quite a bit.
+
+Feel free to open an issue with any bugs, mistakes, or requests you may have.
+
 ## What is this book about?
 
 This series of posts is about using Rust for data engineering tasks for people

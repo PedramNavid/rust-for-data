@@ -21,9 +21,11 @@ In Rust, this is as simple as running
 
 ```bash
 cargo init wxrs
+cargo add reqwest
 ```
 
 This will create a new directory called `wxrs` with a Hello World example.
+It will all add the reqwest crate to our dependencies
 
 
 ### Python

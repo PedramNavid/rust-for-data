@@ -1,4 +1,4 @@
-# Quickstart
+# Prerequisites
 
 ## Installing Rust and Python
 

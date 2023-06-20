@@ -4,7 +4,7 @@ One of the simplest examples to start with is fetching data from an API endpoint
 This is often the beginning of many data pipeline journeys.
 
 In our first case, we will use the [OpenWeatherMap API](https://openweathermap.org/api) to fetch the current weather in
-a configurable location by providing latitude and longitude.
+a configurable location by providing a latitude and longitude on the command line.
 
 You will need to sign up for a free account to get an API key, once you've
 signed up, [create an API key](https://home.openweathermap.org/api_keys).
@@ -20,12 +20,37 @@ through initializing a project.
 In Rust, this is as simple as running
 
 ```bash
+# Create the project
 cargo init wxrs
-cargo add reqwest
+
+# Add a dependency
+cargo add reqwest --features blocking
 ```
 
 This will create a new directory called `wxrs` with a Hello World example.
-It will all add the reqwest crate to our dependencies
+
+It will also add the `reqwest` crate to our dependencies, similar to `pip install`.
+Unlike `pip install` though, this will also update `Cargo.toml` with our dependency,
+and create a `Cargo.lock` file that will lock the `reqwest` crate to a specific version.
+
+The `--features` flag is used to express optional compilation features. Reqwest
+has several options, described in the [crate's documentation](https://docs.rs/reqwest/latest/reqwest/#optional-features).
+
+We will use the `blocking` feature, which will allow us to use the blocking API.
+It gives us a simpler interface to reqwest instead of futures that require
+an async runtime. We will eventually use async to show the power of Rust's
+fearless concurrency.
+
+In Python, we have to manually maintain dependencies and create lockfiles through
+updating `setup.py` or `pyproject.toml`, or using a tool like `pipenv` or `poetry`.
+
+We are not using any specific features, but Python too allows optional features,
+for example `pip install snowflake-connector-python[pandas]`.
+
+```toml
+# Cargo.toml
+{{#include ../../wxrs/Cargo.toml}}
+```
 
 
 ### Python
@@ -75,18 +100,35 @@ Given that I'm in California, it only makes sense to start with the
 
 ### Python
 
+In Python, we'll create a folder for this chapter to keep code organized,
+and then run that file directly.
+
+```bash
+mkdir wxpy/wxpy/ch3
+```
 
 ```python
-# wxpy/wxpy/main.py
-{{#include ../../wxpy/wxpy/main.py}}
+# wxpy/wxpy/ch3/fetch_api.py
+{{#include ../../wxpy/wxpy/ch3/fetch_api.py}}
 ```
 
 
 ### Rust
 
+In Rust, usually we'll have a `main.rs` file that runs our code, with
+additional code imported as modules from other files. There's a great
+[convention for package layouts in Rust](https://doc.rust-lang.org/cargo/guide/project-layout.html).
+
+But since we want to execute our code directly, and we'll have multiple
+binaries, we'll create a `bin` folder and save the code for `ch3` there.
+
+```bash
+mkdir wxrs/src/bin
+```
+
 ```rust,editable
-// wxrs/src/main.rs
-{{#include ../../wxrs/src/main.rs}}
+// wxrs/src/ch3.rs
+{{#include ../../wxrs/src/ch3.rs}}
 ```
 
 ## Running the Program
@@ -104,7 +146,7 @@ In Python, we can use `-m` to run the module directly.
 ```bash
 # in wxpy/wxpy
 # export OPENWEATHERMAP_API_KEY=your-api-key
-python -m wxpy.main 37.9871 -122.5889
+python -m wxpy.ch3.fetch_api 37.9871 -122.5889
 
 > {"coord":{"lon":-122.5889,"lat":37.9871},"list":[{"main":{"aqi":2},"components":{"co":178.58,"no":0.1,"no2":0.47,"o3":70.81,"so2":0.64,"pm2_5":2.58,"pm10":4.18,"nh3":0},"dt":1687221287}]}
 ```
@@ -116,15 +158,19 @@ In Rust, we must first compile the program before running it. If we run
 
 We can also compile and run it with one command `cargo run`
 
+When using `cargo build` Rust will a debug version of our application in
+`./target/debug` for both the `main.rs` file which will be named `wxrs` as
+well for any files located in `src/bin`, such as `ch3.rs`
+
 
 ```bash
-# in wxrs
+# in wxrs/
 cargo build
-./target/debug/wxrs 37.9871 -122.5889
+./target/debug/ch3 37.9871 -122.5889
 > {"coord":{"lon":-122.5889,"lat":37.9871},"list":[{"main":{"aqi":2},"components":{"co":178.58,"no":0.1,"no2":0.47,"o3":70.81,"so2":0.64,"pm2_5":2.58,"pm10":4.18,"nh3":0},"dt":1687221453}]}
 
 # or
-cargo run 37.9871 -122.5889
+cargo run --bin ch3 37.9871 -122.5889
 > {"coord":{"lon":-122.5889,"lat":37.9871},"list":[{"main":{"aqi":2},"components":{"co":178.58,"no":0.1,"no2":0.47,"o3":70.81,"so2":0.64,"pm2_5":2.58,"pm10":4.18,"nh3":0},"dt":1687221453}]}
 
 ```
@@ -183,15 +229,15 @@ Let's take a closer look at an exception we haven't caught yet. If we run the
 Python program with invalid arguments, we get a `ValueError` exception.
 
 ```bash
-python -m wxpy.main nice birds
-> ❯ python -m wxpy.main nice birds
+python -m wxpy.ch3.fetch_api nice birds
+> ❯ python -m wxpy.ch3.fetch_api nice birds
 {"cod":"400","message":"wrong latitude"}
 ```
 
 ```bash
-rust ./target/debug/wxrs nice birds
+./target/debug/ch3 nice birds
 
-> thread 'main' panicked at 'Usage: ./wxrs/target/debug/wxrs [lat] [lon]: ParseFloatError { kind: Invalid }', src/main.rs:24:10
+> thread 'main' panicked at 'Usage: ./target/debug/ch3 [lat] [lon]: ParseFloatError { kind: Invalid }', src/main.rs:24:10
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 ```
 
@@ -206,7 +252,7 @@ as a float. On line 23:24 we call `parse` on the arguments, and we expect them
 to be floats.
 
 ```rust
-{{#include ../../wxrs/src/main.rs:20:24}}
+{{#include ../../wxrs/src/bin/ch3.rs:20:24}}
 ```
 
 the `expect` method tells Rust that if `parse` failed to convert the input,
@@ -236,7 +282,7 @@ cargo build --release
 ```bash
 # in wxpy
 hyperfine --warmup 3 --min-runs 10 \
-    'python -m wxpy.main 37.9871 -122.5889' \
+    'python -m wxpy.ch3.fetch_api 37.9871 -122.5889' \
     --export-markdown ../benchmarks/chapter_3_python_wxpy.md
 ```
 
@@ -246,7 +292,7 @@ hyperfine --warmup 3 --min-runs 10 \
 ```bash
 # in wxrs
 hyperfine --warmup 3 --min-runs 10 \
-    './target/release/wxrs 37.9871 -122.5889' \
+    './target/release/ch3 37.9871 -122.5889' \
     --export-markdown rust.md
 ```
 

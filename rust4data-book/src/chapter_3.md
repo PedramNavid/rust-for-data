@@ -180,11 +180,12 @@ cargo run --bin ch3 37.9871 -122.5889
 Looking at both programs, we can see a fairly similar approach to solving
 this problem.
 
-Both programs use an external library or crate (not-so-coincidentally named request/reqwest).
+Both programs use an external library or crate (not-so-coincidentally named
+request/reqwest).
 
 In both programs, we've created a function that takes a latitude and longitude,
-fetches the results from an API and returns the results as text. We'll cover handling
-structured data from JSON soon.
+fetches the results from an API and returns the results as text. We'll cover
+handling structured data from JSON soon.
 
 ### Types
 
@@ -327,23 +328,14 @@ cargo build --release
 # in wxpy
 hyperfine --warmup 3 --min-runs 10 \
     'python -m wxpy.ch3.fetch_api 37.9871 -122.5889' \
-    --export-markdown ../benchmarks/chapter_3_python_wxpy.md
-```
-
-{{#include ../../benchmarks/chapter_3_python_wxpy.md}}
-
-
-```bash
-# in wxrs
-hyperfine --warmup 3 --min-runs 10 \
     './target/release/ch3 37.9871 -122.5889' \
-    --export-markdown rust.md
+    --export-markdown ../benchmarks/ch3_fetch.md
 ```
 
-{{#include ../../benchmarks/chapter_3_rust_wxrs.md}}
+{{#include ../../benchmarks/ch3_fetch.md}}
 
-On my system, the Python application took an average of 336.4ms to complete,
-while the Rust application was 1.4x faster at 240.7ms. Memory consumption
+On my system, the Python application took an average of 335ms to complete,
+while the Rust application was 1.7x faster at 198ms. Memory consumption
 was also lower in Rust, with the Python application using 26MB vs only 10MB in
 Rust.
 

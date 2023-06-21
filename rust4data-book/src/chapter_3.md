@@ -170,7 +170,7 @@ it doesn't change how memory is allocated.
 
 Another subtle but important difference is the handling of errors. In Python,
 errors are handled as exceptions that are caught. Knowing when to catch an
-exception mostly an art. It's difficult to know which functions throw exceptions,
+exception is mostly an art. It's difficult to know which functions throw exceptions,
 what exceptions to expect, and when to deal with them.
 
 In Rust, errors are handled as values that are returned. This is a much more

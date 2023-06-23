@@ -6,7 +6,7 @@ src = "src"
 title = "Rust For Data"
 
 [output.html]
-git-repository = "https://github.com/PedramNavid/rust-for-data/rust4data-book"
+git-repository-url = "https://github.com/PedramNavid/rust-for-data/"
 edit-url-template = "https://github.com/PedramNavid/rust-for-data/edit/main/rust4data-book/{path}"
 
 [output.html.playground]

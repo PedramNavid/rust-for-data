@@ -9,3 +9,4 @@
 - [Fetching from an API](./chapter_3.md)
 - [Serializing Data](./chapter_4.md)
 
+[About the Author](AUTHOR.md)

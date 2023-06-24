@@ -8,5 +8,6 @@
 
 - [Fetching from an API](./chapter_3.md)
 - [Serializing Data](./chapter_4.md)
+- [Transforming Data](./chapter_5.md)
 
 [About the Author](AUTHOR.md)

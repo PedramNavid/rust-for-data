@@ -5,4 +5,5 @@ dependencies = [
     "requests",
     'importlib-metadata; python_version<"3.8"',
     "polars",
+    "pandas"
 ]

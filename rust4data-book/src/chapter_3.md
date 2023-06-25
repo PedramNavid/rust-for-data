@@ -329,10 +329,10 @@ cargo build --release
 hyperfine --warmup 3 --min-runs 10 \
     'python -m wxpy.ch3.fetch_api 37.9871 -122.5889' \
     './target/release/ch3 37.9871 -122.5889' \
-    --export-markdown ../benchmarks/ch3_fetch.md
+    --export-markdown ../benchmarks/ch3_fetch_api.md
 ```
 
-{{#include ../../benchmarks/ch3_fetch.md}}
+{{#include ../../benchmarks/ch3_fetch_api.md}}
 
 On my system, the Python application took an average of 335ms to complete,
 while the Rust application was 1.7x faster at 198ms. Memory consumption

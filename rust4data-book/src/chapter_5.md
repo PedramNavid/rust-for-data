@@ -19,14 +19,22 @@ Let's look at some key differences between the syntax in Python and Rust.
 ## Python
 
 ```python
-{{#include ../../wxpy/wxpy/ch5/birds.py}}
+{{#include ../../wxpy/wxpy/ch5/ch5.py}}
 ```
 
 The Python code very concise, columns can be selected as a list of strings,
 the `sort` function takes a simple `descending` argument, and the general
 API is very straightforward.
 
-Compare this to the Rust code.
+I've also included an attempt at the same logic in pandas. While largely
+similar, there are a few differences, for example, in how we filter for
+valid results.
+
+```python
+{{#include ../../wxpy/wxpy/ch5/ch5_pandas.py}}
+```
+
+Now let's compare the above to Rust code.
 
 ## Rust
 
@@ -36,4 +44,18 @@ Compare this to the Rust code.
 
 In Rust, the code 75% longer and the syntax is more verbose. There are a lot of
 `unwrap` calls to handle errors, although some of these could be replaced with
-`?`.
+`?` in a real application.
+
+The `sort` function takes a `SortOptions` struct, which is a bit more verbose.
+Overall, the API is very similar.
+
+## Benchmarks
+
+Let's look at some benchmarks for polars in both Python and Rust, as well
+as similar code in Pandas.
+
+{{#include ../../benchmarks/ch5.md}}
+
+The Rust version is the fastest again. The Python-polars code is 1.9x slower
+than the Rust code, but the Pandas code is exceptionally slow, taking over 10
+seconds to complete while both Polars versions take less than 1 second.

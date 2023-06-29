@@ -56,6 +56,6 @@ as similar code in Pandas.
 
 {{#include ../../benchmarks/ch5.md}}
 
-The Rust version is the fastest again. The Python-polars code is 1.9x slower
-than the Rust code, but the Pandas code is exceptionally slow, taking over 10
+The Rust version is the fastest again. The Python-polars code is 1.6x slower
+than the Rust code, but the Pandas code is exceptionally slow, taking over 5 
 seconds to complete while both Polars versions take less than 1 second.

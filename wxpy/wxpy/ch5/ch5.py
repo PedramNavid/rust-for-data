@@ -1,11 +1,29 @@
-import polars as pl
 import os
 
+import polars as pl
+
 script_path = os.path.dirname(os.path.realpath(__file__))
-bird_path = os.path.join(script_path, "../../../lib/birds.csv")
+bird_path = os.path.join(script_path, "../../../lib/PFW_2016_2020_public.csv")
 codes_path = os.path.join(script_path, "../../../lib/species_code.csv")
 
-birds = pl.read_csv(bird_path)
+columns = [
+    "LATITUDE",
+    "LONGITUDE",
+    "SUBNATIONAL1_CODE",
+    "Month",
+    "Day",
+    "Year",
+    "SPECIES_CODE",
+    "HOW_MANY",
+    "VALID",
+]
+
+birds = pl.read_csv(
+    bird_path,
+    columns=columns,
+    new_columns=[s.lower() for s in columns],
+)
+
 codes = pl.read_csv(codes_path).select(
     [
         pl.col("SPECIES_CODE").alias("species_code"),
@@ -20,9 +38,9 @@ birds_df = (
                 "latitude",
                 "longitude",
                 "subnational1_code",
-                "Month",
-                "Day",
-                "Year",
+                "month",
+                "day",
+                "year",
                 "species_code",
                 "how_many",
                 "valid",

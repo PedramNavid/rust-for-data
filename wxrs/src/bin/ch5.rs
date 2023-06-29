@@ -3,14 +3,28 @@ use std::env;
 
 fn main() {
     let current_dir = env::current_dir().expect("Failed to get current directory");
-    let bird_path = current_dir.join("../lib/birds.csv");
+    let bird_path = current_dir.join("../lib/PFW_2016_2020_public.csv");
     let codes_path = current_dir.join("../lib/species_code.csv");
+
+    let cols = vec![
+        "LATITUDE".into(),
+        "LONGITUDE".into(),
+        "SUBNATIONAL1_CODE".into(),
+        "Month".into(),
+        "Day".into(),
+        "Year".into(),
+        "SPECIES_CODE".into(),
+        "HOW_MANY".into(),
+        "VALID".into(),
+    ];
 
     let birds_df = CsvReader::from_path(bird_path)
         .expect("Failed to read CSV file")
         .has_header(true)
+        .with_columns(Some(cols.clone()))
         .finish()
-        .unwrap();
+        .unwrap()
+        .lazy();
 
     let mut codes_df = CsvReader::from_path(codes_path)
         .expect("Failed to read CSV file")
@@ -30,18 +44,7 @@ fn main() {
         .unwrap();
 
     let birds_df = birds_df
-        .lazy()
-        .select([
-            col("latitude"),
-            col("longitude"),
-            col("subnational1_code"),
-            col("Month"),
-            col("Day"),
-            col("Year"),
-            col("species_code"),
-            col("how_many"),
-            col("valid"),
-        ])
+        .rename(cols.clone(), cols.into_iter().map(|x| x.to_lowercase()))
         .filter(col("valid").eq(lit(1)))
         .groupby(["subnational1_code", "species_code"])
         .agg(&[

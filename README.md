@@ -1,6 +1,6 @@
 ## Rust For Data
 
-This book is available for free online at `https://rustfordata.com`
+This book is available for free online at [rustfordata.com](https://rustfordata.com)
 You can find the source code for book in `./rust4data-book`
 This book is very early, so expect code to change quite a bit.
 

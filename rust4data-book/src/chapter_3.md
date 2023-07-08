@@ -24,7 +24,7 @@ In Rust, this is as simple as running
 cargo init wxrs
 
 # Add a dependency
-cargo add reqwest --features blocking
+cd wxrs && cargo add reqwest --features blocking
 ```
 
 This will create a new directory called `wxrs` with a Hello World example.

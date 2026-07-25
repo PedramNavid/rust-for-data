@@ -28,12 +28,18 @@ object has a counter associated with it that is incremented as it is referenced
 and decremented as it is removed from scope. When an object has 0 references,
 it is cleared from memory, freeing up space.
 
-To prevent two different threads from accessing or releasing the same reference
-to an object, the GIL is used to prevent multiple threads from accessing the
-same object. This has the effect of serializing access to objects in memory and
-effectively making CPU-bound Python code single-threaded.
+Those counters are not themselves thread-safe: if two threads incremented or
+decremented the same count at once, the object could be freed while still in
+use, or leak forever. Rather than lock every object individually, CPython takes
+a single global lock, the GIL, which guarantees that only one thread executes
+Python bytecode at a time. This has the effect of serializing execution and
+effectively making CPU-bound Python code single-threaded, no matter how many
+threads you spawn.
 
-To work around these limitations, CPU-bound Python code has to rely on threads,
-which has its own set of limitations and overhead costs.
+To work around these limitations, CPU-bound Python code has to reach for
+separate processes, typically via the `multiprocessing` module, which sidesteps
+the GIL by giving each process its own interpreter. That comes with its own set
+of limitations and overhead costs, since data has to be pickled and copied
+between processes rather than simply shared.
 
 

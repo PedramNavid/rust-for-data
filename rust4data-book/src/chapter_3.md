@@ -159,7 +159,7 @@ In Rust, we must first compile the program before running it. If we run
 
 We can also compile and run it with one command `cargo run`
 
-When using `cargo build` Rust will a debug version of our application in
+When using `cargo build` Rust will build a debug version of our application in
 `./target/debug` for both the `main.rs` file which will be named `wxrs` as
 well for any files located in `src/bin`, such as `ch3.rs`
 
@@ -211,14 +211,16 @@ decimals, `f32` seems like the best choice for our code. We could even opt for
 greater precision by using a 64-bit float or `f64` in Rust which would take 8
 bytes of memory.
 
-Because we know exactly how much memory we need for these variables, Rust
-is able to store these values on the heap.
+Because we know exactly how much memory we need for these variables, and we
+know it at compile time, Rust is able to store these values on the stack. Stack
+allocation is cheap: it's a pointer bump, and the memory is reclaimed
+automatically when the function returns.
 
-In Python, we don't know how much memory lat and lon need until runtime because
+In Python, we don't know what these arguments will be until runtime, because
 Python will accept anything in this function.
 
 ```python
-{{#include ../../wxpy/wxpy/ch3/fetch_api.py:7:8}}
+{{#include ../../wxpy/wxpy/ch3/fetch_api.py:8:9}}
 ```
 
 We could pass it a string, numbers, another function, or even `None`.
@@ -247,7 +249,7 @@ will allocate these values on the heap, and it turns out that Python allocates
 about 24 bytes for each float there. The actual values are stored in a private
 heap.
 
-Now, the difference between 24 bytes and 8 bytes is trivial for an application
+Now, the difference between Python's 24 bytes and Rust's 4 is trivial for an application
 such as this, and even on the most memory-constrained devices it's not worth
 noting. But it's important to know that heap allocation is slower, and even
 small applications may iterate over millions of values. Small differences can
@@ -267,41 +269,42 @@ what exceptions to expect, and when to deal with them.
 
 In Rust, errors are handled as values that are returned. This is a much more
 explicit approach, and it's easier to know what errors to expect and how to
-handle them. In fact, if a function returns a `Result` type, the compiler will
-force you to handle the error. This is a huge benefit to Rust, and it's one of
-the reasons why Rust is so reliable.
+handle them. A function's signature tells you up front that it can fail, and
+`Result` is marked `#[must_use]`, so ignoring one is a compiler warning rather
+than something you silently overlook. This is a huge benefit to Rust, and it's
+one of the reasons why Rust is so reliable.
 
-Let's take a closer look at an exception we haven't caught yet. If we run the
-Python program with invalid arguments, we get a `ValueError` exception.
+Let's take a closer look at what happens with bad input. If we run the
+Python program with arguments that aren't numbers at all, nothing complains
+locally:
 
 ```bash
 python -m wxpy.ch3.fetch_api nice birds
-> ❯ python -m wxpy.ch3.fetch_api nice birds
-{"cod":"400","message":"wrong latitude"}
+> {"cod":"400","message":"wrong latitude"}
 ```
 
 ```bash
 ./target/debug/ch3 nice birds
 
-> thread 'main' panicked at 'Usage: ./target/debug/ch3 [lat] [lon]: ParseFloatError { kind: Invalid }', src/main.rs:24:10
+> thread 'main' panicked at 'Usage: ./target/debug/ch3 [lat] [lon]: ParseFloatError { kind: Invalid }', src/bin/ch3.rs:24:10
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 ```
 
 What happened here?
 
 In Python, we didn't check that our input is valid, and so the application
-send incorrect values to the API, which returned an error message. Fortunately,
+sent incorrect values to the API, which returned an error message. Fortunately,
 we get a million API requests for free a month, so this one doesn't cost us much.
 
 In Rust, the application panicked because it could not parse the inputs we provided
-as a float. On line 23:24 we call `parse` on the arguments, and we expect them
+as a float. On lines 20-24 we call `parse` on the arguments, and we expect them
 to be floats.
 
 ```rust
 {{#include ../../wxrs/src/bin/ch3.rs:20:24}}
 ```
 
-the `expect` method tells Rust that if `parse` failed to convert the input,
+The `expect` method tells Rust that if `parse` failed to convert the input,
 then the application must panic. We output the `usage` message and exit.
 
 You will see `expect` and its cousin `unwrap` used frequently in Rust. They are
@@ -314,6 +317,7 @@ cover error handling in more detail soon.
 Let me preface this by saying speed isn't everything. No doubt someone familiar
 in Python will spend far more time learning Rust than they might ever save by
 running a slightly more optimized program. But it is nice to get a sense of
+the difference, and to watch how it changes as the programs get less trivial.
 
 
 Let's use `hyperfine` to benchmark the two programs. We'll run each program
@@ -335,8 +339,8 @@ hyperfine --warmup 3 --min-runs 10 \
 
 {{#include ../../benchmarks/ch3_fetch_api.md}}
 
-On my system, the Python application took an average of 335ms to complete,
-while the Rust application was 1.7x faster at 198ms. Memory consumption
+On my system, the Python application took an average of 320ms to complete,
+while the Rust application was 1.8x faster at 177ms. Memory consumption
 was also lower in Rust, with the Python application using 26MB vs only 10MB in
 Rust.
 

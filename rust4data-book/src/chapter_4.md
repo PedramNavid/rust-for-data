@@ -1,7 +1,7 @@
 # Serializing Data
 
 In the last chapter we fetched data from the OpenWeather API in order to get
-Air Pollution data. The astute observe will have noticed that we parsed the
+Air Pollution data. The astute observer will have noticed that we parsed the
 response as pure text, although the response was in JSON format.
 
 The goal of this chapter is to walk through how we would take raw data and
@@ -16,7 +16,7 @@ that can later be retrieved. There are many ways to encode data, but largely
 these are broken into human-readable and binary formats.
 
 CSVs, JSON, XML, and YAML are all human-readable serialization formats. Conversely,
-many binary formats exist, such as Parquet, Avro, and Protcol Buffers. Binary
+many binary formats exist, such as Parquet, Avro, and Protocol Buffers. Binary
 formats trade reduced readability for improved performance and size.
 
 In the end, any data that needs to be persisted outside of a computer's memory
@@ -49,8 +49,8 @@ API.
 
 There are a few key things to note here.
 
-first, we're assuming the request was successful and that there is a json
-response body, and that it can parse correctly. if any of these assumptions are
+First, we're assuming the request was successful, that there is a JSON
+response body, and that it can parse correctly. If any of these assumptions are
 incorrect an exception will be raised, and we have no obvious way of knowing
 what these exceptions are or which method might raise one.
 
@@ -66,7 +66,7 @@ can't do anything with the data if it's missing.
 
 
 We also haven't explicitly typed the response from the API. This is something
-we can do with `mypy` or other tools like `pydantic`, but the Python interpret
+we can do with `mypy` or other tools like `pydantic`, but the Python interpreter
 itself has no type-guarantees.
 
 Let's look at how we might do this in Rust.
@@ -222,11 +222,13 @@ are a way of passing a value to a function without transferring ownership of
 the value. This is a key concept in Rust, and it's what allows Rust to
 guarantee memory safety.
 
-In Python, values are passed around using counters. Every time you use a
-variable, Python's Garbage Collector keeps track of how many times it's been
-used. Whenever a function that used a reference exists, the counter is
-decremented. A Garbage Collector occasionally runs and cleans up all unused
-references.
+In Python, values are passed around as references and tracked with counters.
+Every object carries a reference count, which is incremented each time a new
+name points at it and decremented whenever one of those names goes out of
+scope. When the count reaches zero, the object is freed immediately. Python
+also ships a separate cycle-detecting garbage collector, which runs
+occasionally to clean up groups of objects that reference each other and so
+never reach a count of zero on their own.
 
 In Rust, there is no garbage collector. Instead, the compiler keeps track of
 the lifetime of every variable. When a variable goes out of scope, the
@@ -327,7 +329,10 @@ Here are the results of the benchmarks:
 
 {{#include ../../benchmarks/ch4_serialized.md}}
 
-Again, we see a 1.7x improvement in performance, or about 58% faster.
+Again we see Rust come out ahead, this time by about 1.5x: the Rust version
+finishes in roughly two-thirds the time of the Python one. The margin is
+narrower than you might expect, because both programs spend most of their time
+waiting on the network rather than parsing.
 
 ### Offline Benchmarks
 
@@ -344,5 +349,6 @@ Here are the results of the offline benchmarks:
 
 {{#include ../../benchmarks/ch4_offline_benchmark.md}}
 
-Rust is now running twice as fast as Python for these larger payloads.
+With the network out of the picture and a much larger payload, the gap widens
+considerably: Rust is now more than five times as fast as Python.
 

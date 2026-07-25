@@ -1,6 +1,6 @@
 # Chapter 1 - Introduction
 
-{{#include ../../README.md:2:29}}
+{{#include ../../README.md:9:28}}
 
 
 ## Should I use Rust for Data Engineering?
@@ -32,7 +32,7 @@ you learn here will ever have a material impact on your life or career. But
 if you enjoy learning and tinkering, then you might want to tinker with this.
 If you are like me, and you like learning for learning's sake, then you will
 enjoy this experience too. I learned vim and lua not because it was useful,
-but because I was curious about it. I did end up benfiting from it, but I never
+but because I was curious about it. I did end up benefiting from it, but I never
 approached it from a purely utilitarian perspective. There are better ways to
 spend your time if your goal is purely career advancement.
 

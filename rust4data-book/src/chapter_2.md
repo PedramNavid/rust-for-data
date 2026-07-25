@@ -25,7 +25,7 @@ pyenv local proj310
 
 # Confirm pyenv is working
 pyenv version
-> proj310 (set by /Users/username/projects/somepyproj/.python-version)```
+> proj310 (set by /Users/username/projects/somepyproj/.python-version)
 ```
 
 ## Installing the Code

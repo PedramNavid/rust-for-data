@@ -22,7 +22,7 @@ Let's look at some key differences between the syntax in Python and Rust.
 {{#include ../../wxpy/wxpy/ch5/ch5.py}}
 ```
 
-The Python code very concise, columns can be selected as a list of strings,
+The Python code is very concise, columns can be selected as a list of strings,
 the `sort` function takes a simple `descending` argument, and the general
 API is very straightforward.
 
@@ -42,7 +42,7 @@ Now let's compare the above to Rust code.
 {{#include ../../wxrs/src/bin/ch5.rs}}
 ```
 
-In Rust, the code 75% longer and the syntax is more verbose. There are a lot of
+In Rust, the code is 75% longer and the syntax is more verbose. There are a lot of
 `unwrap` calls to handle errors, although some of these could be replaced with
 `?` in a real application.
 

@@ -329,14 +329,13 @@ Here are the results of the benchmarks:
 
 {{#include ../../benchmarks/ch4_serialized.md}}
 
-> As in the last chapter, this table was measured against an older set of
-> dependencies, because regenerating it needs an API key. The offline benchmark
-> below is current.
+Again we see Rust come out ahead, this time by about 1.3x. As in the last
+chapter the margin is narrower than you might expect, and for the same reason:
+both programs spend most of their time waiting on the network, and most of what
+is left is Python's startup. Deserializing 13kb of JSON barely registers
+against either.
 
-Again we see Rust come out ahead, this time by about 1.5x: the Rust version
-finishes in roughly two-thirds the time of the Python one. The margin is
-narrower than you might expect, because both programs spend most of their time
-waiting on the network rather than parsing.
+To actually measure the parsing we need to get the network out of the way.
 
 ### Offline Benchmarks
 

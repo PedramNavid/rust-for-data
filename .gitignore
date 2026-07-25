@@ -1,1 +1,5 @@
 *.csv
+
+# Never commit API keys. The benchmarks read OWM_APPID from here.
+.env
+.env.*

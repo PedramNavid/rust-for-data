@@ -352,14 +352,22 @@ hyperfine --warmup 5 \
 
 {{#include ../../benchmarks/ch3_fetch_api.md}}
 
-> These two numbers were measured against an older set of dependencies and have
-> not been regenerated since, because doing so needs an API key. The offline
-> benchmarks in the next two chapters are current.
+On my system, the Python application took an average of 141ms to complete,
+while the Rust application was 1.3x faster at 109ms. Memory consumption
+was also lower in Rust, with the Python application using 33MB against only
+10MB in Rust.
 
-On my system, the Python application took an average of 320ms to complete,
-while the Rust application was 1.8x faster at 177ms. Memory consumption
-was also lower in Rust, with the Python application using 26MB vs only 10MB in
-Rust.
+That 1.3x is worth picking apart, because it is not really telling us anything
+about how fast either language fetches a URL. Both programs spend most of their
+time waiting on the same network. The interesting column is the CPU time
+`hyperfine` reports: about 10ms of user time for Rust against about 46ms for
+Python. That ~32ms difference is almost exactly the wall-clock gap between the
+two, and it is mostly the cost of starting a Python interpreter and importing
+`requests`.
+
+In other words, for a program this small, we are benchmarking startup. That is
+a real cost if you are invoking a script thousands of times from a scheduler,
+and completely irrelevant if you are running one long-lived process.
 
 Again, this is a trivial application with trivial requirements and performance
 is not a key factor in deciding what language to build. But as we build more

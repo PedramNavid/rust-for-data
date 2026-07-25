@@ -1,5 +1,7 @@
 // ANCHOR: all
 
+use std::io::{BufWriter, Write};
+
 // ANCHOR: structs
 use serde::{Deserialize, Serialize};
 #[derive(Debug, Serialize, Deserialize)]
@@ -69,18 +71,21 @@ pub fn parse_air_pollution(body: AirPollution) -> Vec<(Main, Components, usize)>
 // ANCHOR_END: parse_air
 // ANCHOR_END: forecast
 
-pub fn print_air_pollution(main: Main, components: Components, dt: usize) {
-    println!("---");
-    println!("Weather info for date: {}", dt);
-    println!("AQI: {}", main.aqi);
-    println!("CO: {}", components.co);
-    println!("NO: {}", components.no);
-    println!("NO2: {}", components.no2);
-    println!("O3: {}", components.o3);
-    println!("SO2: {}", components.so2);
-    println!("PM2.5: {}", components.pm2_5);
-    println!("PM10: {}", components.pm10);
-    println!("NH3: {}", components.nh3);
+// Takes a writer rather than calling println! directly. Rust's stdout is line
+// buffered, so println! in a hot loop costs one write syscall per line; wrapping
+// it in a BufWriter is the idiomatic fix. See the note in chapter 4.
+pub fn print_air_pollution<W: Write>(w: &mut W, main: Main, components: Components, dt: usize) {
+    writeln!(w, "---").unwrap();
+    writeln!(w, "Weather info for date: {}", dt).unwrap();
+    writeln!(w, "AQI: {}", main.aqi).unwrap();
+    writeln!(w, "CO: {}", components.co).unwrap();
+    writeln!(w, "NO: {}", components.no).unwrap();
+    writeln!(w, "NO2: {}", components.no2).unwrap();
+    writeln!(w, "O3: {}", components.o3).unwrap();
+    writeln!(w, "SO2: {}", components.so2).unwrap();
+    writeln!(w, "PM2.5: {}", components.pm2_5).unwrap();
+    writeln!(w, "PM10: {}", components.pm10).unwrap();
+    writeln!(w, "NH3: {}", components.nh3).unwrap();
 }
 
 pub fn main() {
@@ -101,8 +106,11 @@ pub fn main() {
     let body = get_air_pollution(lat, lon);
     let results = parse_air_pollution(body);
 
+    let stdout = std::io::stdout();
+    let mut out = BufWriter::new(stdout.lock());
+
     for (main, components, dt) in results {
-        print_air_pollution(main, components, dt);
+        print_air_pollution(&mut out, main, components, dt);
     }
 }
 // ANCHOR_END: all

@@ -1,5 +1,5 @@
-| Command | Mean [ms] | Min [ms] | Max [ms] | Relative |
+| Command | Mean [s] | Min [s] | Max [s] | Relative |
 |:---|---:|---:|---:|---:|
-| `../wxrs/target/release/ch5` | 473.9 ± 5.8 | 461.3 | 480.7 | 1.00 |
-| `python ../wxpy/wxpy/ch5/ch5.py` | 764.8 ± 26.8 | 732.9 | 815.2 | 1.61 ± 0.06 |
-| `python ../wxpy/wxpy/ch5/ch5_pandas.py` | 5644.0 ± 39.2 | 5584.9 | 5710.0 | 11.91 ± 0.17 |
+| `../wxrs/target/release/ch5` | 1.365 ± 0.023 | 1.335 | 1.400 | 3.15 ± 0.10 |
+| `../wxpy/.venv/bin/python ../wxpy/wxpy/ch5/ch5.py` | 0.433 ± 0.011 | 0.416 | 0.450 | 1.00 |
+| `../wxpy/.venv/bin/python ../wxpy/wxpy/ch5/ch5_pandas.py` | 4.107 ± 0.047 | 4.020 | 4.196 | 9.48 ± 0.26 |

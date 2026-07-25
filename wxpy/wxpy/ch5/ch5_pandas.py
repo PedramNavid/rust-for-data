@@ -45,10 +45,11 @@ birds = (
     birds.groupby(["subnational1_code", "species_code"])
     .agg(total_species=("how_many", "sum"), total_sightings=("how_many", "count"))
     .reset_index()
-    .sort_values("total_species", ascending=False)
 )
 
-birds = pd.merge(birds, codes, on="species_code", how="inner")
+birds = pd.merge(birds, codes, on="species_code", how="inner").sort_values(
+    "total_species", ascending=False
+)
 
 
 print(birds)

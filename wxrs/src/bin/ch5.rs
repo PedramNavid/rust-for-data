@@ -1,76 +1,65 @@
 use polars::prelude::*;
-use std::env;
 
-fn main() {
-    let current_dir = env::current_dir().expect("Failed to get current directory");
-    let bird_path = current_dir.join("../lib/PFW_2016_2020_public.csv");
-    let codes_path = current_dir.join("../lib/species_code.csv");
+// Resolved at compile time relative to this crate, so the program works no
+// matter which directory you run it from.
+const BIRD_PATH: &str = concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/../lib/PFW_2016_2020_public.csv"
+);
+const CODES_PATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/../lib/species_code.csv");
 
-    let cols = vec![
-        "LATITUDE".into(),
-        "LONGITUDE".into(),
-        "SUBNATIONAL1_CODE".into(),
-        "Month".into(),
-        "Day".into(),
-        "Year".into(),
-        "SPECIES_CODE".into(),
-        "HOW_MANY".into(),
-        "VALID".into(),
-    ];
+// The columns we care about, in the casing the CSV actually uses.
+const COLS: [&str; 9] = [
+    "LATITUDE",
+    "LONGITUDE",
+    "SUBNATIONAL1_CODE",
+    "Month",
+    "Day",
+    "Year",
+    "SPECIES_CODE",
+    "HOW_MANY",
+    "VALID",
+];
 
-    let birds_df = CsvReader::from_path(bird_path)
-        .expect("Failed to read CSV file")
-        .has_header(true)
-        .with_columns(Some(cols.clone()))
-        .finish()
-        .unwrap()
-        .lazy();
+fn main() -> PolarsResult<()> {
+    let birds = LazyCsvReader::new(BIRD_PATH.into())
+        .with_has_header(true)
+        .finish()?
+        .select(
+            COLS.iter()
+                .map(|name| col(*name).alias(name.to_lowercase()))
+                .collect::<Vec<_>>(),
+        );
 
-    let mut codes_df = CsvReader::from_path(codes_path)
-        .expect("Failed to read CSV file")
-        .infer_schema(None)
-        .has_header(true)
-        .finish()
-        .unwrap();
-
-    codes_df = codes_df
-        .clone()
-        .lazy()
+    let codes = LazyCsvReader::new(CODES_PATH.into())
+        .with_has_header(true)
+        .with_infer_schema_length(None)
+        .finish()?
         .select([
             col("SPECIES_CODE").alias("species_code"),
             col("PRIMARY_COM_NAME").alias("species_name"),
-        ])
-        .collect()
-        .unwrap();
+        ]);
 
-    let birds_df = birds_df
-        .rename(cols.clone(), cols.into_iter().map(|x| x.to_lowercase()))
+    let joined = birds
         .filter(col("valid").eq(lit(1)))
-        .groupby(["subnational1_code", "species_code"])
-        .agg(&[
+        .group_by([col("subnational1_code"), col("species_code")])
+        .agg([
             col("how_many").sum().alias("total_species"),
             col("how_many").count().alias("total_sightings"),
         ])
-        .sort(
-            "total_species",
-            SortOptions {
-                descending: true,
-                nulls_last: false,
-                multithreaded: true,
-            },
-        )
-        .collect()
-        .unwrap();
-
-    let joined = birds_df
         .join(
-            &codes_df,
-            ["species_code"],
-            ["species_code"],
-            JoinType::Inner,
-            None,
+            codes,
+            [col("species_code")],
+            [col("species_code")],
+            JoinArgs::new(JoinType::Inner),
         )
-        .unwrap();
+        .sort(
+            ["total_species"],
+            SortMultipleOptions::default().with_order_descending(true),
+        )
+        .collect_with_engine(Engine::Streaming)?
+        .unwrap_single();
 
     println!("{}", joined);
+    Ok(())
 }

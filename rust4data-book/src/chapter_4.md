@@ -329,6 +329,10 @@ Here are the results of the benchmarks:
 
 {{#include ../../benchmarks/ch4_serialized.md}}
 
+> As in the last chapter, this table was measured against an older set of
+> dependencies, because regenerating it needs an API key. The offline benchmark
+> below is current.
+
 Again we see Rust come out ahead, this time by about 1.5x: the Rust version
 finishes in roughly two-thirds the time of the Python one. The margin is
 narrower than you might expect, because both programs spend most of their time
@@ -350,5 +354,36 @@ Here are the results of the offline benchmarks:
 {{#include ../../benchmarks/ch4_offline_benchmark.md}}
 
 With the network out of the picture and a much larger payload, the gap widens
-considerably: Rust is now more than five times as fast as Python.
+considerably: Rust is now nearly six times as fast as Python.
+
+### An aside: Rust is not automatically faster
+
+The first time I ran this benchmark, Rust *lost*, and it is worth explaining
+why, because it is a mistake that is very easy to make.
+
+Both programs print a line per record, and there are a lot of records. Rust's
+standard output is line buffered, which means every `println!` costs a write
+syscall. Python's standard output, when it is not attached to a terminal, is
+block buffered, so it batches those same lines into far fewer, larger writes.
+The result was a Rust program that spent most of its life in the kernel:
+
+| | Wall time | User | System |
+|:---|---:|---:|---:|
+| Rust, `println!` | 114.2 ms | 42.6 ms | 70.9 ms |
+| Rust, `BufWriter` | 16.8 ms | 15.0 ms | 1.4 ms |
+
+Look at the system time. That is the whole story: the parsing was never the
+problem. Wrapping stdout in a `BufWriter` is the idiomatic fix, and it is what
+the code in the repository now does.
+
+```rust
+let stdout = std::io::stdout();
+let mut out = BufWriter::new(stdout.lock());
+```
+
+The general lesson is one worth internalising before you rewrite anything in
+Rust for performance: a language that is capable of being faster will still
+happily let you write something slower, and the bottleneck is very often I/O
+rather than the computation you were focused on. Measure, and look at where the
+time actually goes.
 

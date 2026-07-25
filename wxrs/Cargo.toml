@@ -3,12 +3,12 @@ name = "wxrs"
 version = "0.1.0"
 edition = "2021"
 
+# Dependency versions are pinned exactly and Cargo.lock is committed, so the
+# code and benchmarks printed in the book match what you get when you build it.
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-chrono = "0.4.26"
-polars = { version = "0.30.0", features = ["lazy"] }
-reqwest = { version = "0.11.18", features = ["blocking", "json"] }
-serde = { version = "1.0.164", features = ["derive"] }
-serde_json = "1.0.97"
-tempfile = "3.6.0"
+polars = { version = "=0.54.4", features = ["lazy", "csv", "strings"] }
+reqwest = { version = "=0.13.4", features = ["blocking", "json"] }
+serde = { version = "=1.0.229", features = ["derive"] }
+serde_json = "=1.0.151"

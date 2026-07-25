@@ -17,7 +17,6 @@ def get_air_pollution():
 ## ANCHOR: parse_air
 def parse_air_pollution(body):
     res = []
-    print(body)
     for row in body["list"]:
         res.append((row["main"]["aqi"], row["components"], row["dt"]))
     return res

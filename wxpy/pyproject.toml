@@ -1,9 +1,12 @@
 [project]
 name = "wxpy"
 version = "0.0.1"
+requires-python = ">=3.11"
+
+# Versions are pinned exactly, and uv.lock is committed, so the code and
+# benchmarks printed in the book match what you get when you run it yourself.
 dependencies = [
-    "requests",
-    'importlib-metadata; python_version<"3.8"',
-    "polars",
-    "pandas"
+    "requests==2.34.2",
+    "polars==1.43.0",
+    "pandas==3.0.5",
 ]

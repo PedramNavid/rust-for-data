@@ -94,12 +94,18 @@ as similar code in Pandas.
 
 {{#include ../../benchmarks/ch5.md}}
 
-This is not the result the earlier version of this chapter reported, and it is
-not the result I expected. **Python is the fastest of the three**, finishing in
-about 0.43s against Rust's 1.37s. Pandas is still comfortably last at 4.1s.
+The first thing to take from this table is the thing that has not changed:
+**both Polars versions comfortably beat pandas**. Rust-Polars is about 3x
+faster than pandas here, and Python-Polars about 9.5x. If you came to this
+chapter wondering whether Polars is worth adopting, that question is settled
+regardless of which language you write it in.
 
-It would be easy to quietly drop this benchmark. It is more interesting to sit
-with it, because it points at something that is true in general and easy to
+The second thing is that **Python-Polars is the fastest of the three**,
+finishing in about 0.43s against Rust's 1.37s. That is not the result the
+earlier version of this chapter reported, and it is not the result I expected.
+
+It would be easy to quietly drop that second finding. It is more interesting to
+sit with it, because it points at something that is true in general and easy to
 forget.
 
 Both Polars versions run *the same engine*. Polars is written in Rust, and the
@@ -135,3 +141,10 @@ the last chapter, one level up. Reaching for Rust does not hand you
 performance. When you call into a library that is already written in Rust,
 choosing Rust as *your* language may buy you very little — you were always
 running Rust, and what actually mattered was how somebody else compiled it.
+
+Which is worth holding next to the pandas column. The 9.5x that separates
+Python-Polars from pandas came from choosing a better tool. The 3x that
+separates it from our Rust build came from choosing a better *build* of the
+same tool. Neither of those is a fact about Python or Rust the languages, and
+picking the right library will usually take you further than picking the right
+language.

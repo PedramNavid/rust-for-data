@@ -1,6 +1,6 @@
 # Chapter 1 - Introduction
 
-{{#include ../../README.md:9:28}}
+{{#include ../../README.md:book_overview}}
 
 
 ## Should I use Rust for Data Engineering?
@@ -11,15 +11,24 @@ language that is fun. There are [cautionary tales](https://mdwdotla.medium.com/u
 about using Rust at a startup, and I think they are worth reading.
 
 There are many reasons why you might not want to use Rust for data engineering.
-The first is that Rust is not as mature as Python. There are many libraries
-that are missing. For example, as of this writing, there are no Snowflake
-libraries for querying data in that warehouse. Most people do not know Rust,
-and it is harder to hire and harder to train people.
+Start with the libraries and integrations your project needs: check whether
+they support the features you use, how they are maintained, and what support
+is available. An earlier version of this chapter said there were no Rust
+libraries for querying Snowflake; that is no longer true, as projects such as
+[snowflake-connector-rs](https://docs.rs/snowflake-connector-rs/) demonstrate.
+If your team already knows Python, learning Rust also adds time to development
+and onboarding.
 
-There may be good reasons to use Rust for data engineering however. When it
-comes to cost and performance, Rust is clearly faster than Python for many
-types of tasks. Memory usage is also much lower, which can be important when
-you are constrained by small IoT devices, for example.
+There may be good reasons to use Rust for data engineering, however. Rust can
+reduce runtime and memory use for some workloads, particularly when replacing
+work done in Python loops. But a Python program may already do most of its
+work inside a native library such as Polars, or spend most of its time waiting
+on a network. Changing the language alone does not guarantee an improvement.
+
+The examples in this book compare particular implementations on particular
+workloads. We will look at what each benchmark includes, whether the programs
+do equivalent work, and where the time goes. Treat the results as measurements
+to investigate and reproduce, rather than promises about your own pipeline.
 
 I can't tell you when to use Rust and when to use Python, but I do believe that
 by understanding both languages, their merits and pitfalls, you will be

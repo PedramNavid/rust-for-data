@@ -1,11 +1,11 @@
 .PHONY: build-release setup data serve benchmarks benchmarks-offline
 
 build-release:
-	cargo build --release --manifest-path=./wxrs/Cargo.toml --target-dir=./wxrs/target
+	cargo build --locked --release --manifest-path=./wxrs/Cargo.toml --target-dir=./wxrs/target
 
 # Create the Python environment from the committed lockfile.
 setup:
-	cd wxpy && uv sync
+	cd wxpy && uv sync --locked
 
 # Chapter 5 works on the Project FeederWatch dataset, which is checked in as a
 # 7z archive because the extracted CSV is ~1.4GB. The extracted .csv is
@@ -13,7 +13,7 @@ setup:
 data: lib/PFW_2016_2020_public.csv
 
 lib/PFW_2016_2020_public.csv:
-	cd lib && uv run --no-project --with py7zr python -c \
+	cd lib && uv run --locked --project ../wxpy --group data python -c \
 		"import py7zr; py7zr.SevenZipFile('PFW_2016_2020_public.7z').extractall('.')"
 
 serve:

@@ -13,8 +13,8 @@ The [Polars documentation](https://docs.pola.rs/) is a great resource for
 getting started, and the API docs have even more detail on syntax.
 
 One thing worth knowing up front: the two languages are on different version
-numbers for the same project. The Python package is at `1.43.0` and the Rust
-crate is at `0.54.4`. They are not as far apart as that makes them look.
+numbers for the same project. The Python package is at `1.44.1` and the Rust
+crate is at `0.55.2`. They are not as far apart as that makes them look.
 
 ## Getting the data
 
@@ -94,57 +94,40 @@ as similar code in Pandas.
 
 {{#include ../../benchmarks/ch5.md}}
 
-The first thing to take from this table is the thing that has not changed:
-**both Polars versions comfortably beat pandas**. Rust-Polars is about 3x
-faster than pandas here, and Python-Polars about 9.5x. If you came to this
-chapter wondering whether Polars is worth adopting, that question is settled
-regardless of which language you write it in.
+These results were regenerated after updating to Rust Polars 0.55.2 and
+Python Polars 1.44.1. The three implementations were checked against each
+other: all 7,724 aggregate rows agree across all five columns after sorting
+independently of display order.
 
-The second thing is that **Python-Polars is the fastest of the three**,
-finishing in about 0.43s against Rust's 1.37s. That is not the result the
-earlier version of this chapter reported, and it is not the result I expected.
+**Both Polars versions beat pandas on this query.** Rust Polars takes about
+1.390s, Python Polars 0.436s, and pandas 4.237s. That makes Rust Polars about
+3.0x faster than pandas and Python Polars about 9.7x faster. This is evidence
+for this workload, rather than a guarantee for every pandas program.
 
-It would be easy to quietly drop that second finding. It is more interesting to
-sit with it, because it points at something that is true in general and easy to
-forget.
+**Python Polars is still the fastest of the three**, about 3.2x faster than
+our Rust build. It would be easy to quietly drop that finding. It is more
+interesting to sit with it.
 
-Both Polars versions run *the same engine*. Polars is written in Rust, and the
-Python package is a thin binding over that same Rust core. This benchmark was
-never really Rust versus Python. It is one build of a Rust library against
-another build of the same Rust library, with a small amount of Python doing the
-orchestration around it. The Python interpreter barely participates: look at
-the user time in the table above and you'll see both Polars runs burning
-several CPU-seconds in parallel inside the engine.
+Both Polars implementations execute their data operations in Rust. The Python
+package provides bindings to Polars, so this is not a comparison between a
+Python loop and a Rust loop. It compares the Python distribution of Polars
+with our local Rust build, including their execution settings. The user CPU
+time exceeds wall time for both Polars programs, consistent with work running
+across multiple threads inside the engine.
 
-So why is our build slower? I checked the two most obvious explanations and
-neither held up:
+An earlier investigation tried a different Rust allocator and switched the
+Rust query to the streaming engine. Neither change closed the gap in that
+run. Those experiments were not repeated during this dependency refresh;
+the checked-in Rust example continues to request the streaming engine, while
+Python calls `collect()` with its default settings.
 
-- **The allocator.** Polars' own docs recommend a custom allocator and say it
-  can be worth up to 25%. Swapping in `mimalloc` changed the runtime by less
-  than the run-to-run noise here, so I took it back out.
-- **The engine.** Recent Polars has both an in-memory and a streaming engine,
-  and Python's `collect()` chooses differently than Rust's does. Forcing the
-  streaming engine in Rust with `collect_with_engine(Engine::Streaming)` took
-  1.43s down to 1.34s — real, but nowhere near a 3x gap.
+Compiler tuning, enabled features, and execution settings are possible
+contributors to the remaining difference. We have not isolated their effects,
+so the timings do not establish that build tuning is the cause. Pinning the
+package versions alone does not make these two implementations identical.
 
-What is left is the build itself. The Python wheels are compiled with tuning
-that a plain `cargo build --release` does not apply — the
-[Polars performance notes](https://docs.rs/polars/latest/polars/#performance)
-recommend a nightly compiler with the `simd` and `performant` features and
-`RUSTFLAGS='-C target-cpu=native'`. I have not chased that here, partly because
-`target-cpu=native` produces a binary tuned to whatever machine built it, which
-is at odds with pinning everything else in this repository so the numbers
-reproduce.
-
-The lesson I would take from this is the same one from the `BufWriter` aside in
-the last chapter, one level up. Reaching for Rust does not hand you
-performance. When you call into a library that is already written in Rust,
-choosing Rust as *your* language may buy you very little — you were always
-running Rust, and what actually mattered was how somebody else compiled it.
-
-Which is worth holding next to the pandas column. The 9.5x that separates
-Python-Polars from pandas came from choosing a better tool. The 3x that
-separates it from our Rust build came from choosing a better *build* of the
-same tool. Neither of those is a fact about Python or Rust the languages, and
-picking the right library will usually take you further than picking the right
-language.
+The lesson is similar to the `BufWriter` example in the last chapter:
+reaching for Rust does not hand you performance. When Python already calls a
+native library, changing your application language may buy you little.
+Measure the complete workload and verify that the results agree before
+interpreting the timing differences.

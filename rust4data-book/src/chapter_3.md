@@ -324,7 +324,7 @@ the difference, and to watch how it changes as the programs get less trivial.
 
 
 Let's use `hyperfine` to benchmark the two programs. We'll run each program
-10 times and take the average. Before we benchmark the Rust application,
+10 times after five warmups and take the average. Before we benchmark the Rust application,
 we'll compile it using `--release` which builds a release rather than a
 debug version and it should provide us with a faster application.
 
@@ -338,36 +338,40 @@ so you can reproduce them yourself:
 ```bash
 # from the repo root
 make build-release
-OWM_APPID=your-api-key make benchmarks
+OWM_APPID=your-api-key make -C benchmarks online \
+    'BENCHMARK_CMD=hyperfine --warmup 5 --runs 10'
 ```
 
 Under the hood that is just `hyperfine` comparing the two binaries:
 
 ```bash
-hyperfine --warmup 5 \
+hyperfine --warmup 5 --runs 10 \
     '../wxrs/target/release/ch3 30 -140' \
     '../wxpy/.venv/bin/python ../wxpy/wxpy/ch3/fetch_api.py 30 -140' \
     --export-markdown ch3_fetch_api.md
 ```
 
+These results were regenerated against the live API after the dependency
+refresh, using five warmups and ten measured runs per implementation.
+
 {{#include ../../benchmarks/ch3_fetch_api.md}}
 
-On my system, the Python application took an average of 141ms to complete,
-while the Rust application was 1.3x faster at 109ms. Memory consumption
-was also lower in Rust, with the Python application using 33MB against only
-10MB in Rust.
+On this run, Python averaged 156.9ms and Rust 95.9ms, making Rust about 1.64x
+faster for this complete command. Run-to-run standard deviations were 13.0ms
+and 5.7ms respectively. These timings include startup, the HTTP request, and
+printing the response.
 
-That 1.3x is worth picking apart, because it is not really telling us anything
-about how fast either language fetches a URL. Both programs spend most of their
-time waiting on the same network. The interesting column is the CPU time
-`hyperfine` reports: about 10ms of user time for Rust against about 46ms for
-Python. That ~32ms difference is almost exactly the wall-clock gap between the
-two, and it is mostly the cost of starting a Python interpreter and importing
-`requests`.
+That ratio does not tell us how fast either language fetches a URL in
+isolation. User CPU time was about 55.2ms for Python and 6.4ms for Rust;
+system CPU time was 11.9ms and 6.6ms. The roughly 54ms difference in total
+CPU time accounts for much of the 61ms wall-clock gap. Interpreter startup
+and imports are plausible contributors, but this benchmark does not isolate
+them from the other work each program performs.
 
-In other words, for a program this small, we are benchmarking startup. That is
-a real cost if you are invoking a script thousands of times from a scheduler,
-and completely irrelevant if you are running one long-lived process.
+Both programs also wait on the network, and requests happen sequentially
+against a live service. Latency variation affects the result. A long-lived
+process that reuses a client would be a different workload. No new
+peak-memory measurements were taken in this run.
 
 Again, this is a trivial application with trivial requirements and performance
 is not a key factor in deciding what language to build. But as we build more
@@ -378,5 +382,4 @@ how the gap changes.
 
 In this chapter we've built a simple application that fetches data from an API
 and returns the results. We've seen how Rust and Python differ in their approach
-to handling errors and types, and we've seen how Rust can be faster and more
-memory efficient than Python.
+to handling errors and types, and measured the runtime of both complete programs against the live API.

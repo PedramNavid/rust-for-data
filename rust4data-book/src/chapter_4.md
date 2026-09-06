@@ -325,15 +325,22 @@ pattern.
 {{#include ../../wxrs/src/bin/ch4_benchmark.rs:forecast}}
 ```
 
-Here are the results of the benchmarks:
+These results were regenerated against the live forecast API after the
+dependency refresh, using five warmups and ten measured runs per program.
+The preflight response contained 96 records in about 13KB.
 
 {{#include ../../benchmarks/ch4_serialized.md}}
 
-Again we see Rust come out ahead, this time by about 1.3x. As in the last
-chapter the margin is narrower than you might expect, and for the same reason:
-both programs spend most of their time waiting on the network, and most of what
-is left is Python's startup. Deserializing 13kb of JSON barely registers
-against either.
+Rust averaged 107.0ms and Python 170.1ms, a ratio of about 1.59x. The
+run-to-run standard deviations were 8.7ms and 14.0ms respectively. User CPU
+time was 6.7ms for Rust and 56.9ms for Python, while system CPU time was
+7.3ms and 12.0ms.
+
+As in the previous chapter, these are whole-program measurements that include
+startup and a live HTTP request. They also include output formatting: the
+Python example prints the decoded response before printing individual records,
+while the Rust example prints individual records. This is not an isolated,
+equal-output comparison of deserialization speed.
 
 To actually measure the parsing we need to get the network out of the way.
 
@@ -352,8 +359,11 @@ Here are the results of the offline benchmarks:
 
 {{#include ../../benchmarks/ch4_offline_benchmark.md}}
 
-With the network out of the picture and a much larger payload, the gap widens
-considerably: Rust is now nearly six times as fast as Python.
+With the network out of the picture and a much larger payload, the refreshed
+run takes about 16.7ms in Rust and 102.4ms in Python, a ratio of about 6.1x.
+This measures the whole program: startup, file reading, JSON decoding,
+formatting, and writing output, rather than decoding alone. Both programs
+process the same records, but their output labels and formatting differ.
 
 ### An aside: Rust is not automatically faster
 
@@ -365,6 +375,9 @@ standard output is line buffered, which means every `println!` costs a write
 syscall. Python's standard output, when it is not attached to a terminal, is
 block buffered, so it batches those same lines into far fewer, larger writes.
 The result was a Rust program that spent most of its life in the kernel:
+
+The following measurements are from that earlier buffering experiment; they
+were not rerun during the dependency refresh.
 
 | | Wall time | User | System |
 |:---|---:|---:|---:|
@@ -385,4 +398,3 @@ Rust for performance: a language that is capable of being faster will still
 happily let you write something slower, and the bottleneck is very often I/O
 rather than the computation you were focused on. Measure, and look at where the
 time actually goes.
-

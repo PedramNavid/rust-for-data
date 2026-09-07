@@ -325,19 +325,23 @@ pattern.
 {{#include ../../wxrs/src/bin/ch4_benchmark.rs:forecast}}
 ```
 
-These results were regenerated against the live forecast API after the
-dependency refresh, using five warmups and ten measured runs per program.
-The preflight response contained 96 records in about 13KB.
+These results were regenerated against the live forecast API after both
+programs were switched to HTTPS with an explicit timeout and status check,
+using five warmups and ten measured runs per program. Both programs exit
+non-zero on an HTTP error, so every timed run was a successful request. The
+response contains 96 records in about 13KB.
 
 {{#include ../../benchmarks/ch4_serialized.md}}
 
-Rust averaged 107.0ms and Python 170.1ms, a ratio of about 1.59x. The
-run-to-run standard deviations were 8.7ms and 14.0ms respectively. User CPU
-time was 6.7ms for Rust and 56.9ms for Python, while system CPU time was
-7.3ms and 12.0ms.
+Rust averaged 183.4ms and Python 213.5ms, a ratio of about 1.16x. The
+run-to-run standard deviations were 27.6ms and 32.1ms respectively. User CPU
+time was 34.3ms for Rust and 61.6ms for Python, while system CPU time was
+6.4ms and 12.8ms.
 
 As in the previous chapter, these are whole-program measurements that include
-startup and a live HTTP request. They also include output formatting: the
+startup, a TLS handshake, and a live HTTP request. Most of the Rust CPU time
+is the handshake, which is why the gap is far narrower than the offline
+results below. They also include output formatting: the
 Python example prints the decoded response before printing individual records,
 while the Rust example prints individual records. This is not an isolated,
 equal-output comparison of deserialization speed.

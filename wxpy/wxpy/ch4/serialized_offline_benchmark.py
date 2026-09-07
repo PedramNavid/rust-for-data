@@ -1,7 +1,6 @@
-
 ## ANCHOR: all
-import os
 import json
+import os
 
 API_KEY = os.getenv("OWM_APPID")
 
@@ -11,7 +10,6 @@ def get_air_pollution():
     script_path = os.path.dirname(os.path.realpath(__file__))
     with open(os.path.join(script_path, "../../../lib/big_payload.json"), "r") as f:
         return json.loads(f.read())
-
 
 
 ## ANCHOR: parse_air

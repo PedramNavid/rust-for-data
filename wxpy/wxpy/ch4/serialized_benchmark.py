@@ -1,6 +1,7 @@
 ## ANCHOR: all
 import os
 import sys
+
 import requests
 
 API_KEY = os.getenv("OWM_APPID")
@@ -8,9 +9,10 @@ API_KEY = os.getenv("OWM_APPID")
 
 ## ANCHOR: forecast
 def get_air_pollution(lat, lon):
-    url = f"http://api.openweathermap.org/data/2.5/air_pollution/forecast?lat={lat}&lon={lon}&appid={API_KEY}"
-    body = requests.get(url).json()
-    return body
+    url = f"https://api.openweathermap.org/data/2.5/air_pollution/forecast?lat={lat}&lon={lon}&appid={API_KEY}"
+    response = requests.get(url, timeout=10)
+    response.raise_for_status()
+    return response.json()
 
 
 ## ANCHOR: parse_air

@@ -1,14 +1,17 @@
 import os
 import sys
+
 import requests
 
 API_KEY = os.getenv("OWM_APPID")
+URL = "https://api.openweathermap.org/data/2.5/air_pollution"
 
 
 def get_air_pollution(lat, lon):
-    url = f"http://api.openweathermap.org/data/2.5/air_pollution?lat={lat}&lon={lon}&appid={API_KEY}"
-    body = requests.get(url).text
-    return body
+    params = {"lat": lat, "lon": lon, "appid": API_KEY}
+    response = requests.get(URL, params=params, timeout=10)
+    response.raise_for_status()
+    return response.text
 
 
 if __name__ == "__main__":
@@ -22,7 +25,17 @@ if __name__ == "__main__":
         print(usage)
         sys.exit(1)
 
-    lat = sys.argv[1]
-    lon = sys.argv[2]
-    body = get_air_pollution(lat, lon)
+    try:
+        lat = float(sys.argv[1])
+        lon = float(sys.argv[2])
+    except ValueError:
+        print(usage)
+        sys.exit(1)
+
+    try:
+        body = get_air_pollution(lat, lon)
+    except requests.RequestException as err:
+        print(f"Request failed: {err}")
+        sys.exit(1)
+
     print(body)

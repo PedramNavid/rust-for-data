@@ -47,12 +47,21 @@ pub fn get_air_pollution(lat: f32, lon: f32) -> AirPollution {
     );
 
     let url = format!(
-        "http://api.openweathermap.org/data/2.5/air_pollution?lat={}&lon={}&appid={}",
+        "https://api.openweathermap.org/data/2.5/air_pollution?lat={}&lon={}&appid={}",
         lat, lon, api_key
     );
 
-    reqwest::blocking::get(url)
+    let client = reqwest::blocking::Client::builder()
+        .timeout(std::time::Duration::from_secs(10))
+        .build()
+        .expect("client failed");
+
+    client
+        .get(url)
+        .send()
         .expect("request failed")
+        .error_for_status()
+        .expect("server returned an error")
         .json()
         .expect("json failed")
     // ANCHOR_END: get_json

@@ -1,8 +1,10 @@
 # Benchmark provenance
 
-The offline and online tables were regenerated on 2026-09-05 after refreshing
-both dependency lockfiles. The online tables use the live OpenWeather API.
-Only the chapter 4 buffering comparison remains historical.
+The offline tables were regenerated on 2026-09-05 after refreshing both
+dependency lockfiles. The online tables were regenerated on 2026-09-06 after
+the chapter 3 and 4 programs switched to HTTPS with an explicit ten second
+timeout and an HTTP status check. The online tables use the live OpenWeather
+API. Only the chapter 4 buffering comparison remains historical.
 
 ## Environment
 
@@ -69,6 +71,9 @@ implementation. No new peak-memory measurements were taken.
   order. This checks this dataset, not every possible null or malformed input.
 - All six online example commands ran against a local HTTP fixture. This checks
   request/response handling, not live authentication or service availability.
+- On 2026-09-06 the four timed online programs were run with an invalid key.
+  All four exited non-zero on the resulting HTTP 401 instead of printing the
+  error document, so hyperfine now aborts rather than timing a failed request.
 - `make data` extracted the archive into a scratch directory, and the resulting
   CSV matched the existing dataset byte for byte.
 
@@ -78,21 +83,27 @@ and the local Rust build.
 
 ## Live API run
 
-Both endpoint preflights returned HTTP 200 with valid records: one current
-record (175 bytes) and 96 forecast records (13,097 bytes). The four timed
-commands completed successfully, with five warmups and ten measured requests
-each: 60 benchmark requests plus two preflight requests.
+The four timed commands completed successfully over HTTPS, with five warmups
+and ten measured requests each: 60 benchmark requests in total. Every program
+exits non-zero on a non-2xx status and hyperfine aborts on a failing command,
+so all sixty timed responses were HTTP 200.
 
 | Command | Mean wall time | User CPU | System CPU |
 |:---|---:|---:|---:|
-| Rust current API | 95.9 ms | 6.4 ms | 6.6 ms |
-| Python current API | 156.9 ms | 55.2 ms | 11.9 ms |
-| Rust forecast | 107.0 ms | 6.7 ms | 7.3 ms |
-| Python forecast | 170.1 ms | 56.9 ms | 12.0 ms |
+| Rust current API | 152.5 ms | 31.7 ms | 4.9 ms |
+| Python current API | 171.0 ms | 56.8 ms | 11.2 ms |
+| Rust forecast | 183.4 ms | 34.3 ms | 6.4 ms |
+| Python forecast | 213.5 ms | 61.6 ms | 12.8 ms |
+
+The previous plain-HTTP run (2026-09-05) measured 95.9 ms and 156.9 ms for the
+current API, with about 6 ms of Rust user CPU. The TLS handshake accounts for
+most of the added Rust CPU time: this build of reqwest uses rustls, while
+Python uses the system OpenSSL through the standard library. The gap between
+the two languages is correspondingly narrower, and the Rust runs were the
+noisier of the two on this pass.
 
 The generated tables contain standard deviations and ranges. These measure
-live requests, startup, and printing; network latency is not controlled.
-The Python forecast program also prints the full decoded response, so the
-forecast commands do not perform identical output work. No new memory
-measurements were taken. The current-fetch programs do not reject HTTP errors;
-the successful preflight does not prove every timed response had HTTP 200.
+live requests, a TLS handshake, startup, and printing; network latency is not
+controlled. The Python forecast program also prints the full decoded response,
+so the forecast commands do not perform identical output work. No new memory
+measurements were taken.
